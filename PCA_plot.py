@@ -40,14 +40,15 @@ def page2():
 
     if len(dataframe0) > 0:
         pca = PCA().fit(dataframe0)
-        fig, ax = plt.subplots()
-        ax.plot([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],np.cumsum(pca.explained_variance_ratio_[0:15]))
-        ax.set_xlabel('number of components')
-        ax.set_ylabel('cumulative explained variance')
-        ax.set_title('Explained variance', fontsize = 10)
-        ax.grid()    
+        
+        fig0, ax0 = plt.subplots()
+        ax0.plot([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],np.cumsum(pca.explained_variance_ratio_[0:15]))
+        ax0.set_xlabel('number of components')
+        ax0.set_ylabel('cumulative explained variance')
+        ax0.set_title('Explained variance', fontsize = 10)
+        ax0.grid()    
 
-        st.write(fig)
+        st.write(fig0)
 
 def page3():
     st.markdown("Page 3: Score plot")
@@ -57,22 +58,45 @@ def page3():
     The aim of this page is to plot two principal components 
     against ech other, showing their score plot. 
     """)
-    
-    dataframe1 = [] 
-    uploaded_file1 = st.file_uploader('files', accept_multiple_files=False, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="hidden")
-    
-    if uploaded_file1 is not None:
-        # Can be used wherever a "file-like" object is accepted:
-        df1 = pd.read_csv(uploaded_file0)
-        dataframe1 = df1.drop(['400','2112','diagnostic'],axis=1)
-        labels = df1['diagnostic']
-        labels = np.array(labels)
-    
-    # You need an input asking for the two principal components the
-    # user want to visualise 
+    First_pc = ''
+    Second_pc = ''
+
+    First_pc = st.text_input("First PC: ")
+    Second_pc = st.text_input("Second PC: ")
+
+    if len(First_pc) > 0 and len(Second_pc) > 0:
+        dataframe1 = [] 
+        uploaded_file1 = st.file_uploader('files', accept_multiple_files=False, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="hidden")
+        if uploaded_file1 is not None:
+            df1 = pd.read_csv(uploaded_file1)
+            dataframe1 = df1.drop(['400','2112','diagnostic'],axis=1)
+            labels = df1['diagnostic']
+            labels = np.array(labels)
+
         
-    if len(dataframe1) > 0:
-        st.line_chart(dataframe)
+        if len(dataframe1) > 0:
+    
+            transformer = PCA(n_components=8)
+            X_pc = transformer.fit_transform(dataframe1)
+            DF = pd.DataFrame(X_pc, columns = ['1', '2','3', '4', '5', '6', '7', '8'])
+        
+            fig1, ax1 = plt.subplots()
+            #ax1 = fig1.add_subplot(1,1,1) 
+            ax1.set_xlabel('Principal Component' + str(First_pc), fontsize = 15)
+            ax1.set_ylabel('Principal Component' + str(Second_pc), fontsize = 15)
+            ax1.set_title('2 component PCA', fontsize = 20)
+            targets = [np.unique(labels)[0], np.unique(labels)[1]]
+            colors = ['r','b']
+            for target, color in zip(targets,colors):
+                indicesToKeep = labels == target
+                ax1.scatter(DF.loc[indicesToKeep, str(First_pc)]
+                    , DF.loc[indicesToKeep, str(Second_pc)]
+                    , c = color
+                    , s = 50)
+            ax1.legend(targets)
+            ax1.grid()
+
+            st.write(fig1)
 
 page_names_to_funcs = {
     "Main Page": main_page,

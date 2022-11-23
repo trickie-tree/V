@@ -9,11 +9,11 @@ def main_page():
     st.sidebar.markdown("Home page")
 
     st.write("""
-    The aim of this app is to process and plot a vibrational spectroscopy spectrum
-
-    Index:
-        Page 2: Cumulative explained variance (CEV) plot
-        Page 3: Score plot
+    The aim of this app is to process and plot a vibrational spectroscopy spectrum\n
+    \n
+    Index:\n
+        Page 2: Cumulative explained variance (CEV) plot\n
+        Page 3: Score plot\n
         Page 4: Loading plot
     """)
 
@@ -98,10 +98,16 @@ def page3():
 
             st.write(fig1)
 
+def page4():
+
+    st.write('#This will be the loadings plot page')
+        
+
 page_names_to_funcs = {
     "Main Page": main_page,
     "Page 2": page2,
     "Page 3": page3,
+    "Page 4": page4,
 }
 
 selected_page = st.sidebar.selectbox("Select a page", page_names_to_funcs.keys())

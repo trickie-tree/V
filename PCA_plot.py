@@ -27,25 +27,24 @@ def page2():
     to an acceptable ammount of variance within the dataset.
     """)
 
-    dataframe2 = [] 
-    uploaded_file = st.file_uploader('files', accept_multiple_files=False, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="hidden")
+    dataframe0 = [] 
+    uploaded_file0 = st.file_uploader('files', accept_multiple_files=False, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="hidden")
     
-    if uploaded_file is not None:
+    if uploaded_file0 is not None:
         # Can be used wherever a "file-like" object is accepted:
-        dataframe2 = pd.read_csv(uploaded_file).set_index('Wavenumbers')
+        df0 = pd.read_csv(uploaded_file0)
+        dataframe0 = df0.drop(['400','2112','diagnostic'],axis=1)
+        #labels = df0['diagnostic']
+        #labels = np.array(labels)
     
-    
-    # The next step is to make a csv file with the labels in the 
-    # first column and add a few lines selecting the labels and dataset
-    # from dataframe2 at the beginning of the if statement 
 
-    if len(dataframe2) > 0:
-        pca = PCA().fit(dataframe2)
+    if len(dataframe0) > 0:
+        pca = PCA().fit(dataframe0)
         fig, ax = plt.subplots()
         ax.plot([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],np.cumsum(pca.explained_variance_ratio_[0:15]))
-        ax.xlabel('number of components')
-        ax.ylabel('cumulative explained variance')
-        ax.title('Explained variance', fontsize = 10)
+        ax.set_xlabel('number of components')
+        ax.set_ylabel('cumulative explained variance')
+        ax.set_title('Explained variance', fontsize = 10)
         ax.grid()    
 
         st.write(fig)
@@ -59,14 +58,20 @@ def page3():
     against ech other, showing their score plot. 
     """)
     
-    dataframe = [] 
-    uploaded_file = st.file_uploader('files', accept_multiple_files=False, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="hidden")
+    dataframe1 = [] 
+    uploaded_file1 = st.file_uploader('files', accept_multiple_files=False, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="hidden")
     
-    if uploaded_file is not None:
+    if uploaded_file1 is not None:
         # Can be used wherever a "file-like" object is accepted:
-        dataframe = pd.read_csv(uploaded_file).set_index('Wavenumbers')
+        df1 = pd.read_csv(uploaded_file0)
+        dataframe1 = df1.drop(['400','2112','diagnostic'],axis=1)
+        labels = df1['diagnostic']
+        labels = np.array(labels)
     
-    if len(dataframe) > 0:
+    # You need an input asking for the two principal components the
+    # user want to visualise 
+        
+    if len(dataframe1) > 0:
         st.line_chart(dataframe)
 
 page_names_to_funcs = {

@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.style.use('ggplot')
 from sklearn.decomposition import PCA
 
 
@@ -39,9 +41,6 @@ def page1():
 def page2():
 
     # Task 1:
-    # Format the plot, nicer plot
-
-    # Task 2:
     # Have somthing print out the PCs representing a suitable ammount of variance
     # Potentially a method of setting a limit
 
@@ -58,7 +57,6 @@ def page2():
     uploaded_file0 = st.file_uploader('files', accept_multiple_files=False, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="hidden")
     
     if uploaded_file0 is not None:
-        # Can be used wherever a "file-like" object is accepted:
         df0 = pd.read_csv(uploaded_file0)
         dataframe0 = df0.drop(['400','2112','diagnostic'],axis=1)    
 
@@ -70,7 +68,7 @@ def page2():
         ax0.set_xlabel('number of components')
         ax0.set_ylabel('cumulative explained variance')
         ax0.set_title('Explained variance', fontsize = 10)
-        ax0.grid()    
+        ax0.grid(True)    
 
         st.write(fig0)
 
@@ -82,9 +80,6 @@ def page3():
 def page4():
 
     # Task 1:
-    # Automate x and y axis ranges
-
-    # Task 2:
     # Build in a method of varying the number of classes
 
     st.markdown("Page 4: Score plot")
@@ -111,16 +106,24 @@ def page4():
 
         
         if len(dataframe1) > 0:
-    
+              
             transformer = PCA(n_components=8)
             X_pc = transformer.fit_transform(dataframe1)
             DF = pd.DataFrame(X_pc, columns = ['1', '2','3', '4', '5', '6', '7', '8'])
-        
+
+            PCs = pd.concat([DF[First_pc], DF[Second_pc]], axis=0)
+
+            positive_lim0 = round(float(max(abs(PCs))*1.2),2) 
+            negative_lim0 = round(float(max(abs(PCs))*-1.2),2)
+
             fig1, ax1 = plt.subplots()
             #ax1 = fig1.add_subplot(1,1,1) 
-            ax1.set_xlabel('Principal Component' + str(First_pc), fontsize = 15)
-            ax1.set_ylabel('Principal Component' + str(Second_pc), fontsize = 15)
+            ax1.set_xlabel('Principal Component ' + str(First_pc), fontsize = 15)
+            ax1.set_ylabel('Principal Component ' + str(Second_pc), fontsize = 15)
             ax1.set_title('2 component PCA', fontsize = 20)
+            ax1.set_ylim(negative_lim0,positive_lim0)
+            ax1.set_xlim(negative_lim0,positive_lim0)
+            
             targets = [np.unique(labels)[0], np.unique(labels)[1]]
             colors = ['r','b']
             for target, color in zip(targets,colors):
@@ -130,7 +133,10 @@ def page4():
                     , c = color
                     , s = 50)
             ax1.legend(targets)
-            ax1.grid()
+            ax1.grid(True)
+
+            ax1.axhline(y = 0, color = 'k', linestyle = '--', alpha=0.5)
+            ax1.vlines(x=0, ymin=negative_lim0, ymax=positive_lim0, color = 'k', linestyle = '--', alpha=0.5)
 
             st.write(fig1)
 
@@ -138,7 +144,7 @@ def page4():
 def page5():
 
     # Task 1:
-    # Improve the plot (wavenumbers, y-axis range, formatting)
+    # Add wavenumbers to the plot
 
     # Task 2:
     # Looking to include an automatic method for identifying
@@ -167,20 +173,22 @@ def page5():
         loadings = pca.components_.T
         Loadings = pd.DataFrame(loadings)
 
-        PC_loading = pd.DataFrame(Loadings.iloc[:,int(PC)])
+        PC_loading = np.array(Loadings.iloc[:,int(PC)])
+
+        positive_lim1 = round(float(max(abs(PC_loading))*1.1),2) 
+        negative_lim1 = round(float(max(abs(PC_loading))*-1.1),2) 
 
         fig2, ax2 = plt.subplots()
         ax2.plot(PC_loading) 
+        ax2.axhline(y = 0, color = 'k', linestyle = '--', alpha=0.5)
         ax2.set_title('PC' + str(PC) + ' Loading plot')
+        ax2.set_ylim(negative_lim1,positive_lim1)
         ax2.grid()
 
         st.write(fig2)    
 
 
-page_names_to_funcs = {
-    
-    # Need to update the page names,
-    # perhaps after all pages are sorted  
+page_names_to_funcs = {  
 
     "Home Page": home_page,
     "Page 1 (CSV format)": page1,

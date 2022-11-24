@@ -99,8 +99,38 @@ def page3():
             st.write(fig1)
 
 def page4():
+    st.markdown("Page 4: Loadings plots")
+    st.sidebar.markdown("Page 4: Loadings plots")
 
-    st.write('#This will be the loadings plot page')
+    st.write('Loadings plot page')
+
+    PC = ''
+    
+    PC = st.text_input("Principal component: ")
+    
+    dataframe2 = [] 
+
+    if len(PC) > 0:
+        
+        uploaded_file2 = st.file_uploader('files', accept_multiple_files=False, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="hidden")
+        if uploaded_file2 is not None:
+            df2 = pd.read_csv(uploaded_file2)
+            dataframe2 = df2.drop(['400','2112','diagnostic'],axis=1)
+    
+            
+    if len(dataframe2) > 0:
+        pca = PCA().fit(dataframe2)
+        loadings = pca.components_.T
+        Loadings = pd.DataFrame(loadings)
+
+        PC_loading = pd.DataFrame(Loadings.iloc[:,int(PC)])
+
+        fig2, ax2 = plt.subplots()
+        ax2.plot(PC_loading) 
+        ax2.set_title('PC' + str(PC) + ' Loading plot')
+        ax2.grid()
+
+        st.write(fig2)
         
 
 page_names_to_funcs = {

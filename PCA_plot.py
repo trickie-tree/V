@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 mpl.style.use('ggplot')
 from sklearn.decomposition import PCA
+from sklearn import preprocessing
+from sklearn.tree import DecisionTreeClassifier
+import graphviz 
+from sklearn import tree
 
 
 def home_page():
@@ -16,7 +20,10 @@ def home_page():
     # Add a page for CSV formatting from wdf
 
     # Task 3: 
-    # Add a page for the selection of PCs  
+    # Create general functions that can be used in each page when 
+    # similar tasks are repeated (PCA, open file, etc.)
+    
+    # Look into OOP, & PEP 8
 
     st.markdown("Home page")
     st.sidebar.markdown("Home page")
@@ -34,9 +41,11 @@ def home_page():
 
 
 def page1():
-    st.markdown("Page 1: CSV format")
-    st.sidebar.markdown("Page 1: CSV format")
-    # Add the wdf to csv formatting
+    st.markdown("Page 1: CSV format check")
+    st.sidebar.markdown("Page 1: CSV format check")
+    
+    st.write('''This page is to check that the csv file used in the next pages \n
+    is in the correct format''')
 
 def page2():
 
@@ -62,9 +71,11 @@ def page2():
 
     if len(dataframe0) > 0:
         pca = PCA().fit(dataframe0)
+
+        CEV = pca.explained_variance_ratio_[0:15]
         
         fig0, ax0 = plt.subplots()
-        ax0.plot([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],np.cumsum(pca.explained_variance_ratio_[0:15]))
+        ax0.plot([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],np.cumsum(CEV))
         ax0.set_xlabel('number of components')
         ax0.set_ylabel('cumulative explained variance')
         ax0.set_title('Explained variance', fontsize = 10)
@@ -72,11 +83,38 @@ def page2():
 
         st.write(fig0)
 
+        Sel = st.text_input("What is the minimum variance you will allow? \n (typical value around 1%)")
+        if len(Sel) > 0:
+            Seltd = str(len(CEV[CEV > float(Sel)/100]))
+            st.write("The first " + Seltd + " principal components are\n above your threshold of " + Sel + "%")
+
 
 def page3():
-    pass
-    # Need to add the PC select page
 
+    dataframe = [] 
+    uploaded_file = st.file_uploader('files', accept_multiple_files=False, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="hidden")
+    
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        dataframe = df.drop(['400','2112','diagnostic'],axis=1)  
+        labels = np.array(df['diagnostic']) 
+
+
+        
+        transformer = PCA(n_components=8)
+        columns = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8']
+        X_pc = transformer.fit_transform(dataframe)
+        DF = pd.DataFrame(X_pc, columns = columns)
+        
+        decision_tree = DecisionTreeClassifier(random_state=0, max_depth=3)
+        decision_tree = decision_tree.fit(DF, labels)
+        
+        fig = plt.figure(figsize=(25,20))
+        _ = tree.plot_tree(decision_tree, feature_names=columns, filled=True)
+
+        st.write(fig)
+
+    
 def page4():
 
     # Task 1:
@@ -117,7 +155,6 @@ def page4():
             negative_lim0 = round(float(max(abs(PCs))*-1.2),2)
 
             fig1, ax1 = plt.subplots()
-            #ax1 = fig1.add_subplot(1,1,1) 
             ax1.set_xlabel('Principal Component ' + str(First_pc), fontsize = 15)
             ax1.set_ylabel('Principal Component ' + str(Second_pc), fontsize = 15)
             ax1.set_title('2 component PCA', fontsize = 20)
